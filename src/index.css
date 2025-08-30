@@ -20,6 +20,143 @@
       repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(255,255,255,.01) 2px, rgba(255,255,255,.01) 4px);
     animation: grain 12s steps(10) infinite;
   }
+
+  /* Flashlight mask for revealing hidden glyphs */
+  .flashlight-mask {
+    pointer-events: none;
+    /* Use CSS variables set by JS: --fx, --fy, --fr */
+    /* mask-composite fallback chain */
+    -webkit-mask-image: radial-gradient(
+      circle var(--fr, 180px) at var(--fx, 50vw) var(--fy, 50vh),
+      rgba(255,255,255,1) 0%,
+      rgba(255,255,255,0.9) 50%,
+      rgba(255,255,255,0.0) 85%
+    );
+    mask-image: radial-gradient(
+      circle var(--fr, 180px) at var(--fx, 50vw) var(--fy, 50vh),
+      rgba(255,255,255,1) 0%,
+      rgba(255,255,255,0.9) 50%,
+      rgba(255,255,255,0.0) 85%
+    );
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 200vmax 200vmax;
+    mask-size: 200vmax 200vmax;
+  }
+
+  /* Scanlines and CRT roll for glitch text */
+  .glitch-text {
+    position: relative;
+    text-shadow: 0 0 0 rgba(0,0,0,0.0);
+  }
+  .glitch-text::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    color: inherit;
+    mix-blend-mode: screen;
+    text-shadow: -1px 0 rgba(255,0,80,0.4), 1px 0 rgba(0,255,255,0.4);
+    animation: glitchShift 2.5s infinite steps(2) alternate;
+    pointer-events: none;
+  }
+  .glitch-text::after {
+    content: '';
+    position: absolute;
+    left: -2px; right: -2px; top: -2px; bottom: -2px;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.05) 0px,
+        rgba(255,255,255,0.05) 1px,
+        rgba(0,0,0,0.0) 3px,
+        rgba(0,0,0,0.0) 4px
+      );
+    opacity: 0.25;
+    mix-blend-mode: overlay;
+    animation: scanlines 8s linear infinite, crtRoll 22s linear infinite;
+    pointer-events: none;
+  }
+
+  /* Hover glow utility for icons/buttons */
+  .hover-glow {
+    transition: transform 200ms ease, filter 200ms ease, opacity 200ms ease, box-shadow 200ms ease;
+  }
+  .hover-glow:hover {
+    transform: translateY(-1px) scale(1.05);
+    filter: drop-shadow(0 0 10px rgba(248,248,255,0.35));
+    opacity: 0.95;
+  }
+
+  /* Aggressive glitch just for the word UNSTABLE */
+  .unstable-glitch {
+    position: relative;
+    display: inline-block;
+    padding: 0 0.15em;
+  }
+  .unstable-glitch::before,
+  .unstable-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .unstable-glitch::before {
+    color: currentColor; /* no color channels */
+    transform: translate(0, 0);
+    clip-path: inset(0 0 45% 0);
+    filter: contrast(120%) brightness(105%);
+    animation: ugShift1 300ms steps(2) infinite, ugSlice1 2.4s linear infinite;
+  }
+  .unstable-glitch::after {
+    color: currentColor; /* no color channels */
+    transform: translate(0, 0);
+    clip-path: inset(55% 0 0 0);
+    filter: contrast(120%) brightness(105%);
+    animation: ugShift2 320ms steps(2) infinite, ugSlice2 2.6s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .unstable-glitch::before, .unstable-glitch::after { animation: none; }
+  }
+
+  /* Typewriter caret */
+  .type-caret {
+    display: inline-block;
+    width: 1ch;
+    margin-left: 2px;
+    border-right: 2px solid rgba(248,248,255,0.8);
+    animation: caretBlink 1s steps(2) infinite;
+  }
+  @keyframes caretBlink { 50% { border-color: transparent; } }
+
+  /* Surge state: hard fragment the word */
+  .unstable-surge {
+    animation: ugExplodeWord 380ms steps(2) 1;
+  }
+  .unstable-surge::before {
+    animation: ugShiftBig 100ms steps(2) infinite, ugSliceBig 340ms linear infinite, ugScatter 380ms steps(2) 1;
+  }
+  .unstable-surge::after {
+    animation: ugShiftBig2 110ms steps(2) infinite, ugSliceBig2 360ms linear infinite, ugScatter 380ms steps(2) 1 reverse;
+  }
+
+  /* Mist layers (soft drifting fog) */
+  .mist-layer {
+    pointer-events: none;
+    background-image:
+      radial-gradient(60% 40% at 20% 30%, rgba(255,255,255,0.06), transparent 60%),
+      radial-gradient(40% 30% at 70% 60%, rgba(255,255,255,0.05), transparent 60%),
+      radial-gradient(70% 50% at 40% 80%, rgba(255,255,255,0.04), transparent 70%);
+    filter: blur(18px) saturate(120%);
+    opacity: 0.35;
+    animation: drift 60s linear infinite;
+  }
+  .mist-layer.slower { animation-duration: 95s; opacity: 0.28; }
+  .mist-layer.faster { animation-duration: 40s; opacity: 0.38; }
+
+  /* Blink/phase animation for entity when congested */
+  .blink-phase {
+    animation: blink 1.8s steps(1) infinite, phase 6s ease-in-out infinite;
+  }
 }
 
 @keyframes grain {
@@ -34,3 +171,93 @@
   80% { transform: translate(1%, 15%); }
   90% { transform: translate(-5%, 5%); }
 }
+
+@keyframes glitchShift {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-1px, 0); }
+  40% { transform: translate(1px, 0); }
+  60% { transform: translate(-1px, 0); }
+  80% { transform: translate(1px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes scanlines {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+
+@keyframes crtRoll {
+  0% { clip-path: inset(0 0 100% 0); }
+  2% { clip-path: inset(0 0 0 0); }
+  3% { clip-path: inset(100% 0 0 0); }
+  5% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes drift {
+  0% { transform: translate3d(-10%, -2%, 0); }
+  50% { transform: translate3d(10%, 2%, 0); }
+  100% { transform: translate3d(-10%, -2%, 0); }
+}
+
+@keyframes blink {
+  0%, 90%, 100% { opacity: 1; }
+  92% { opacity: 0.15; }
+  94% { opacity: 1; }
+  96% { opacity: 0.1; }
+  98% { opacity: 1; }
+}
+
+@keyframes phase {
+  0%, 100% { filter: hue-rotate(0deg) saturate(100%); }
+  50% { filter: hue-rotate(12deg) saturate(130%); }
+}
+
+/* Keyframes for aggressive UNSTABLE glitches: small, fast, and slice jumps */
+@keyframes ugShift1 {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2px, 0); }
+  20% { transform: translate(2px, 0); }
+  30% { transform: translate(-1px, 0); }
+  40% { transform: translate(1px, 0); }
+  50% { transform: translate(-3px, 0); }
+  60% { transform: translate(3px, 0); }
+  70% { transform: translate(-1px, 0); }
+  80% { transform: translate(1px, 0); }
+  90% { transform: translate(0, 0); }
+}
+@keyframes ugShift2 {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(2px, 0); }
+  25% { transform: translate(-2px, 0); }
+  35% { transform: translate(1px, 0); }
+  45% { transform: translate(-1px, 0); }
+  55% { transform: translate(3px, 0); }
+  65% { transform: translate(-3px, 0); }
+  75% { transform: translate(1px, 0); }
+  85% { transform: translate(-1px, 0); }
+}
+@keyframes ugSlice1 {
+  0% { clip-path: inset(0 0 45% 0); }
+  20% { clip-path: inset(0 0 35% 0); }
+  40% { clip-path: inset(0 0 55% 0); }
+  60% { clip-path: inset(0 0 28% 0); }
+  80% { clip-path: inset(0 0 60% 0); }
+  100% { clip-path: inset(0 0 45% 0); }
+}
+@keyframes ugSlice2 {
+  0% { clip-path: inset(55% 0 0 0); }
+  20% { clip-path: inset(65% 0 0 0); }
+  40% { clip-path: inset(48% 0 0 0); }
+  60% { clip-path: inset(72% 0 0 0); }
+  80% { clip-path: inset(40% 0 0 0); }
+  100% { clip-path: inset(55% 0 0 0); }
+}
+
+/* Bigger, harsher motions for surge */
+@keyframes ugShiftBig { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-4px,0)} }
+@keyframes ugShiftBig2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(4px,0)} }
+@keyframes ugSliceBig { 0%{clip-path:inset(0 0 60% 0)}50%{clip-path:inset(0 0 25% 0)}100%{clip-path:inset(0 0 60% 0)} }
+@keyframes ugSliceBig2 { 0%{clip-path:inset(40% 0 0 0)}50%{clip-path:inset(75% 0 0 0)}100%{clip-path:inset(40% 0 0 0)} }
+@keyframes ugExplodeWord { 0%{letter-spacing:0.1em} 50%{letter-spacing:0.6em} 100%{letter-spacing:0.15em} }
+@keyframes ugScatter { 0%{opacity:1} 40%{opacity:0.65} 80%{opacity:0.4; filter: blur(0.6px)} 100%{opacity:1; filter:none} }

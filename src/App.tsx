@@ -1,13 +1,27 @@
 import VideoBackground from './components/VideoBackground';
+import FlashlightOverlay from './components/FlashlightOverlay';
+import ParallaxMist from './components/ParallaxMist';
+import ContractCard from './components/ContractCard';
+import useSolanaCongestion from './components/useSolanaCongestion';
+import TypewriterGlitchTitle from './components/TypewriterGlitchTitle';
 
 function App() {
+  const congested = useSolanaCongestion();
+  const envToken = (import.meta as any).env?.VITE_TOKEN_ADDRESS as string | undefined;
+  const storedToken = typeof window !== 'undefined' ? (window.localStorage.getItem('tokenAddress') || undefined) : undefined;
+  const tokenAddress = storedToken ?? envToken ?? '';
   return (
     <div className="min-h-screen relative">
       <VideoBackground />
+      <ParallaxMist />
+      {/* Place flashlight behind interactive UI but above background */}
+      <div className="absolute inset-0 z-0">
+        <FlashlightOverlay />
+      </div>
       
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center">
         <div className="text-center">
-          <div className="relative w-[26.4rem] h-[26.4rem] md:w-[31.2rem] md:h-[31.2rem] lg:w-[36rem] lg:h-[36rem] mx-auto mb-6 group cursor-pointer">
+          <div className={`relative w-[26.4rem] h-[26.4rem] md:w-[31.2rem] md:h-[31.2rem] lg:w-[36rem] lg:h-[36rem] mx-auto mb-6 group cursor-pointer ${congested ? 'blink-phase' : ''}` }>
             <img 
               src="/void-entity.png" 
               alt="Void Entity" 
@@ -27,14 +41,17 @@ function App() {
             />
           </div>
           
-          <h1 className="text-2xl font-mono tracking-widest mb-12 text-ghost-white/90">
-            THE VOID HAS BECOME UNSTABLE
-          </h1>
+          <TypewriterGlitchTitle
+            prefixText="THE VOIDCATS HAVE BECOME "
+            glitchWord="UNSTABLE"
+            className="text-2xl mb-12"
+            loopDelayRangeMs={[1500, 3500]}
+          />
           
-          <div className="flex gap-8 justify-center mb-16">
+          <div className="flex gap-8 justify-center mb-10">
             <a 
               href="https://x.com/unstable_void" 
-              className="text-ghost-white/70 hover:text-ghost-white transition-colors"
+              className="text-ghost-white/70 hover:text-ghost-white transition-colors hover-glow rounded-md p-1"
               aria-label="Twitter"
             >
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
@@ -42,12 +59,18 @@ function App() {
               </svg>
             </a>
             <a 
-              href="#" 
-              className="hover:opacity-80 transition-opacity"
+              href="https://pump.fun/board" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:opacity-90 transition-opacity hover-glow rounded-md p-1"
               aria-label="Pump"
             >
               <img src="/pump.png" alt="Pump" className="w-8 h-8 object-contain" />
             </a>
+          </div>
+
+          <div className="mb-16 px-6 w-full flex justify-center">
+            <ContractCard address={tokenAddress} symbol="voidcat" />
           </div>
         </div>
       </div>
