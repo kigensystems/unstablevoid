@@ -9,7 +9,10 @@ function App() {
   const congested = useSolanaCongestion();
   const envToken = (import.meta as any).env?.VITE_TOKEN_ADDRESS as string | undefined;
   const storedToken = typeof window !== 'undefined' ? (window.localStorage.getItem('tokenAddress') || undefined) : undefined;
-  const tokenAddress = storedToken ?? envToken ?? '';
+  const tokenAddress = storedToken ?? envToken ?? 'H8KDgDhVuB7Fv9RgvtrB5FDbg9F5uUBsysX3z8Y4pump';
+  const pillHref = tokenAddress && tokenAddress.length > 0 
+    ? `https://pump.fun/coin/${tokenAddress}` 
+    : 'https://pump.fun/board';
   return (
     <div className="min-h-screen relative">
       <VideoBackground />
@@ -59,7 +62,7 @@ function App() {
               </svg>
             </a>
             <a 
-              href="https://pump.fun/board" 
+              href={pillHref} 
               target="_blank" 
               rel="noopener noreferrer"
               className="hover:opacity-90 transition-opacity hover-glow rounded-md p-1"
